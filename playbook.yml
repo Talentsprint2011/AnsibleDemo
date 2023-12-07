@@ -1,0 +1,39 @@
+---
+- name: Updates in the node servers
+  hosts: testservers
+  remote_user: root
+  tasks:
+  - name: Update apt
+    apt: update-cache=yes
+  - name: Install JDK
+    apt:
+      name: openjdk-17-jdk
+      state: latest
+  - name: Install basic system packages
+    apt:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - vim
+      - htop
+      - curl
+      - wget
+  - name: Install Python and Node.js
+    apt:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - python3
+      - nodejs
+  - name: Install Database Clients and Redis
+    apt:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - mysql-client
+      - postgresql-client
+      - redis-server
+  - name: Install Nginx
+    apt:
+      name: nginx
+      state: present
