@@ -25,15 +25,15 @@
     with_items:
       - python3
       - nodejs
-  - name: Install Database Clients and Redis
-    apt:
-      name: "{{ item }}"
-      state: present
-    with_items:
-      - mysql-client
-      - postgresql-client
-      - redis-server
-  - name: Install Nginx
-    apt:
-      name: nginx
-      state: present
+
+- name: Reboot
+  hosts: el_patching_all_reboot
+  remote_user: root
+  vars:
+    el_patching_method: "all"
+    el_patching_auto_reboot: true
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
