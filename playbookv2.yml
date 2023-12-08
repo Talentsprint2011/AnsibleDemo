@@ -16,12 +16,10 @@
     with_items:
       - python3
       - nodejs
-  - name: 
   - name: Copy the script to the target nodes
     copy: 
-      src: /etc/ansible/additional_packages.sh
-      dest: /home/ubuntu/additional_packages.sh
-      mode: +x
+      src: /etc/ansible/demofile.txt
+      dest: /home/ubuntu/demofile.txt
   - name: Execute the script
     script: /home/ubuntu/additional_packages.sh
 
