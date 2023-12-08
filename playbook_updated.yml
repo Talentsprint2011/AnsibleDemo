@@ -1,0 +1,50 @@
+---
+- name: Updates in the node servers
+  hosts: testservers
+  remote_user: root
+  tasks:
+  - name: Update apt
+    apt: update-cache=yes
+  - name: Install JDK
+    apt:
+      name: openjdk-17-jdk
+      state: latest  
+  - name: Install Python and Node.js
+    apt:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - python3
+      - nodejs
+
+- name: Rebooting
+  hosts: el_patching_all_reboot
+  become: true
+  remote_user: root
+  vars:
+    # defaults file for el_patching
+    el_patching_required_packages: "yum-utils"
+    el_patching_reboot_timeout: 600
+    el_patching_method: "security"
+    el_patching_auto_reboot: false
+  tasks:
+  - name: Update apt package cache
+    apt:
+      update_cache: yes
+  - name: Install debian-goodies
+    apt:
+      name: debian-goodies
+      state: present
+  - name: Verify if restart is required
+    ansible.builtin.command:
+      cmd: checkrestart
+    register: __el_patching_need_restart
+    failed_when: __el_patching_need_restart.rc > 1
+  - name: Inform user if reboot is required
+    ansible.builtin.debug:
+      msg: "Reboot is required to apply patches."
+    when: __el_patching_need_restart.rc == 1
+  - name: Reboot host
+    ansible.builtin.reboot:
+      reboot_timeout: "{{ el_patching_reboot_timeout }}"
+    when: el_patching_auto_reboot | bool and __el_patching_need_restart.rc == 1
