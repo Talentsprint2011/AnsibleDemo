@@ -18,10 +18,10 @@
       - nodejs
   - name: Copy the script to the target nodes
     copy: 
-      src: /etc/ansible/demofile.txt
-      dest: /home/ubuntu/demofile.txt
+      src: /home/ubuntu/ansible/demo.txt
+      dest: /home/ubuntu/demo.txt
   - name: Execute the script
-    script: /home/ubuntu/additional_packages.sh
+    script: /home/ubuntu/script.sh
 
 - name: Rebooting
   hosts: el_patching_all_reboot
