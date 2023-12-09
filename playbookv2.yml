@@ -40,23 +40,10 @@
     reboot_timeout: 600
     auto_reboot: true
   tasks:
-  - name: Update apt package cache
-    apt:
-      update_cache: yes
-  - name: Install debian-goodies utility
-    apt:
-      name: debian-goodies
-      state: present
-  - name: Verify if restart is required
-    ansible.builtin.command:
-      cmd: checkrestart
-    register: need_restart
-    failed_when: need_restart.rc > 1
-  - name: Inform user if reboot is required
+  - name: Inform user that a reboot is required
     ansible.builtin.debug:
       msg: "Reboot is required to apply patches."
-    when: need_restart.rc == 1
   - name: Reboot host
     ansible.builtin.reboot:
       reboot_timeout: "{{ reboot_timeout }}"
-    when: auto_reboot | bool and need_restart.rc == 1
+    when: auto_reboot | bool
