@@ -26,10 +26,10 @@
   tasks:  
   - name: Copy files to target nodes
     ansible.builtin.copy: 
-      src: /home/root/ansible/demo.txt
-      dest: /home/root/demo.txt
+      src: /root/ansible/demo.txt
+      dest: /root/demo.txt
   - name: Execute a script
-    script: /home/root/script.sh
+    script: /root/script.sh
 
 - name: Rebooting all systems after patching
   hosts: allservers
