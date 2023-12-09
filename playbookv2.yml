@@ -29,7 +29,7 @@
       src: /root/ansible/demo.txt
       dest: /root/demo.txt
   - name: Execute a script
-    script: /root/script.sh
+    script: /root/ansible/script.sh
 
 - name: Rebooting all systems after patching
   hosts: allservers
