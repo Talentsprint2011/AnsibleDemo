@@ -1,14 +1,18 @@
 ---
-- name: Updates in the node servers
-  hosts: testservers
+- name: Install Java dev environment in Project1 servers
+  hosts: project1
   remote_user: root
   tasks:
-  - name: Update apt
+  - name: Update apt package cache
     apt: update-cache=yes
   - name: Install JDK
     apt:
       name: openjdk-17-jdk
-      state: latest  
+      state: latest 
+- name: Install Python dev environment in Project2 servers
+  hosts: project2
+  remote_user: root
+  tasks:  
   - name: Install Python and Node.js
     apt:
       name: "{{ item }}"
@@ -16,41 +20,43 @@
     with_items:
       - python3
       - nodejs
-  - name: Copy the script to the target nodes
-    copy: 
-      src: /home/ubuntu/ansible/demo.txt
-      dest: /home/ubuntu/demo.txt
-  - name: Execute the script
-    script: /home/ubuntu/script.sh
+- name:  Copy mandatory patch files and execute scripts on all dev servers
+  hosts: allservers
+  remote_user: root
+  tasks:  
+  - name: Copy files to target nodes
+    ansible.builtin.copy: 
+      src: /home/root/ansible/demo.txt
+      dest: /home/root/demo.txt
+  - name: Execute a script
+    script: /home/root/script.sh
 
-- name: Rebooting
-  hosts: el_patching_all_reboot
+- name: Rebooting all systems after patching
+  hosts: allservers
   become: true
   remote_user: root
   vars:
-    # defaults file for el_patching
-    el_patching_required_packages: "yum-utils"
-    el_patching_reboot_timeout: 600
-    el_patching_method: "security"
-    el_patching_auto_reboot: false
+    # defaults
+    reboot_timeout: 600
+    auto_reboot: true
   tasks:
   - name: Update apt package cache
     apt:
       update_cache: yes
-  - name: Install debian-goodies
+  - name: Install debian-goodies utility
     apt:
       name: debian-goodies
       state: present
   - name: Verify if restart is required
     ansible.builtin.command:
       cmd: checkrestart
-    register: __el_patching_need_restart
-    failed_when: __el_patching_need_restart.rc > 1
+    register: need_restart
+    failed_when: need_restart.rc > 1
   - name: Inform user if reboot is required
     ansible.builtin.debug:
       msg: "Reboot is required to apply patches."
-    when: __el_patching_need_restart.rc == 1
+    when: need_restart.rc == 1
   - name: Reboot host
     ansible.builtin.reboot:
-      reboot_timeout: "{{ el_patching_reboot_timeout }}"
-    when: el_patching_auto_reboot | bool and __el_patching_need_restart.rc == 1
+      reboot_timeout: "{{ reboot_timeout }}"
+    when: auto_reboot | bool and need_restart.rc == 1
